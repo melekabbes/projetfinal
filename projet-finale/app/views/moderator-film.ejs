@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion des Films</title>
+  <style>
+    body {
+      background: url('/images/cinema.gif') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      color: #ffd700;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      color: white;
+    }
+    th {
+      background-color: #ffd700;
+      color: #333;
+    }
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      color: white;
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: white;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    button {
+      background-color: #ffd700;
+      color: #333;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #ffa500;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .retour {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #333;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .retour:hover {
+      background-color: #555;
+    }
+    .form-container {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .image-affiche {
+      width: 80px;
+      height: auto;
+      border-radius: 4px;
+    }
+    #message {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; top: 0; }
+      to { opacity: 1; top: 10px; }
+    }
+    .form-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+    }
+    .form-inline input,
+    .form-inline select,
+    .form-inline textarea {
+      flex: 1 1 200px;
+    }
+    .form-inline button {
+      flex: 0 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gestion des Films</h1>
+    <div id="message"></div>
+    <div class="form-container">
+      <h2>Ajouter un film</h2>
+      <form id="form-ajout" action="/moderator/films" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="titre">Titre:</label>
+          <input type="text" id="titre" name="titre" required>
+        </div>
+        <div class="form-group">
+          <label for="description">Description :</label>
+          <textarea id="description" name="description" rows="4" placeholder="Entrez une description détaillée..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="genre">Genre:</label>
+          <select id="genre" name="genre" required>
+            <option value="">-- Choisir un genre --</option>
+            <% const genres = ['Action','Aventure','Comédie','Drame','Fantastique','Horreur','Romance','Science-fiction','Thriller','Documentaire','Animation','Policier','Musical','Western']; %>
+            <% genres.forEach(genre => { %>
+              <option value="<%= genre %>"><%= genre %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="duree">Durée (minutes):</label>
+          <input type="number" id="duree" name="duree" required>
+        </div>
+        <div class="form-group">
+          <label for="prix">Prix (DT):</label>
+          <input type="number" id="prix" name="prix" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="date_sortie">Date de sortie:</label>
+          <input type="date" id="date_sortie" name="date_sortie">
+        </div>
+        <div class="form-group">
+          <label for="image_affiche">Image Affiche:</label>
+          <input type="file" id="image_affiche" name="image_affiche" accept="image/*">
+        </div>
+        <button type="submit">Ajouter</button>
+      </form>
+    </div>
+    <h2>Liste des films</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Titre</th>
+          <th>Genre</th>
+          <th>Durée (min)</th>
+          <th>Prix (DT)</th>
+          <th>Date de sortie</th>
+          <th>Affiche</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% films.forEach(film => { %>
+        <tr>
+          <td><%= film.id %></td>
+          <td><%= film.titre %></td>
+          <td><%= film.genre %></td>
+          <td><%= film.duree %></td>
+          <td><%= Number(film.prix).toFixed(2) %> DT</td>
+          <td><%= film.date_sortie ? new Date(film.date_sortie).toLocaleDateString() : '' %></td>
+          <td>
+            <% if (film.image_affiche) { %>
+              <img class="image-affiche" src="data:image/jpeg;base64,<%= film.image_affiche.toString('base64') %>" alt="Affiche">
+            <% } else { %>
+              Pas d'image
+            <% } %>
+          </td>
+          <td class="actions">
+            <form class="form-inline" action="/moderator/films/<%= film.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+              <input type="text" name="titre" value="<%= film.titre %>" required>
+              <select name="genre" required>
+                <% genres.forEach(genre => { %>
+                  <option value="<%= genre %>" <%= genre === film.genre ? 'selected' : '' %>><%= genre %></option>
+                <% }); %>
+              </select>
+              <input type="number" name="duree" value="<%= film.duree %>" required>
+              <input type="number" name="prix" value="<%= film.prix %>" step="0.01" min="0" required>
+              <input type="date" name="date_sortie" value="<%= film.date_sortie ? film.date_sortie.toISOString().substring(0,10) : '' %>">
+              <input type="file" name="image_affiche" accept="image/*">
+              <button type="submit">Modifier</button>
+              <button type="submit" formaction="/moderator/films/<%= film.id %>?_method=DELETE" formmethod="POST" onclick="return confirm('Voulez-vous vraiment supprimer ce film ?')">Supprimer</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="/moderator/dashboard" class="retour">Retour au dashboard</a>
+    </div>
+  </div>
+  <script>
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+    window.addEventListener('load', () => {
+      const action = getUrlParameter('action');
+      const msgDiv = document.getElementById('message'); 
+      if (action) {
+        if (action === 'ajout') {
+          msgDiv.textContent = 'Film ajouté avec succès';
+          msgDiv.style.backgroundColor = '#4BB543';
+        } else if (action === 'modification') {
+          msgDiv.textContent = 'Film modifié avec succès';
+          msgDiv.style.backgroundColor = '#2196F3';
+        }
+        msgDiv.style.display = 'block';
+        setTimeout(() => {
+          msgDiv.style.display = 'none';
+        }, 4000);
+      }
+    });
+  </script>
+</body>
+</html>

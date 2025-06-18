@@ -443,7 +443,6 @@ exports.updateSeance = async (req, res) => {
     if (!seance) {
       return res.status(404).send({ message: "seance non trouver" });
     }
-    }
 
     // update seance
     await seance.update({

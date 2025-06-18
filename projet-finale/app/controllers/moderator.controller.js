@@ -415,7 +415,7 @@ exports.createSeance = async (req, res) => {
     // njbed duree nt3 film
     const film = await db.film.findByPk(req.body.id_film);
     if (!film) {
-      return res.status(404).send({ message: "Film non trouvé" });
+      return res.status(404).send({ message: "film non trouve" });
     }
 
     // na3mel lcreation inta3 seance
@@ -469,14 +469,14 @@ exports.deleteSeance = async (req, res) => {
 
     if (reservations > 0) {
       return res.status(400).send({ 
-        message: "Impossible de supprimer cette séance car des réservations y sont associées" 
+        message: "Impossible de supprimer cette seance car des reservations sont associees" 
       });
     }
 
     await db.seance.destroy({ where: { id: req.params.id } });
     res.redirect("/moderator/seances");
   } catch (err) {
-    console.error("Erreur suppression séance:", err);
+    console.error("Erreur suppression seance:", err);
     res.status(500).send({ message: err.message });
   }
 };

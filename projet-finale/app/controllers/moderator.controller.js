@@ -380,7 +380,7 @@ exports.deletePayment = async (req, res) => {
 
 
 
-// Gestion des séances
+// Gestion des seances
 exports.listSeances = async (req, res) => {
   try {
     const [seances, films, salles] = await Promise.all([
@@ -401,7 +401,7 @@ exports.listSeances = async (req, res) => {
       salles
     });
   } catch (err) {
-    console.error("Erreur liste séances:", err);
+    console.error("Erreur liste seances:", err);
     res.status(500).send({ message: err.message });
   }
 };
@@ -412,32 +412,13 @@ exports.createSeance = async (req, res) => {
       return res.status(400).send({ message: "Tous les champs sont requis" });
     }
 
-    // Vérifier si la salle est disponible à cette heure
-    const conflit = await db.seance.findOne({
-      where: {
-        id_salle: req.body.id_salle,
-        date_heure: {
-          [Op.between]: [
-            new Date(new Date(req.body.date_heure).getTime() - 2 * 60 * 60 * 1000), // 2h avant
-            new Date(new Date(req.body.date_heure).getTime() + 2 * 60 * 60 * 1000)  // 2h après
-          ]
-        }
-      }
-    });
-
-    if (conflit) {
-      return res.status(400).send({ 
-        message: "La salle est déjà réservée pour une séance proche de cette heure" 
-      });
-    }
-
-    // Récupérer la durée du film
+    // njbed duree nt3 film
     const film = await db.film.findByPk(req.body.id_film);
     if (!film) {
       return res.status(404).send({ message: "Film non trouvé" });
     }
 
-    // Créer la séance
+    // na3mel lcreation inta3 seance
     await db.seance.create({
       date_heure: req.body.date_heure,
       id_film: req.body.id_film,
@@ -460,30 +441,11 @@ exports.updateSeance = async (req, res) => {
 
     const seance = await db.seance.findByPk(req.params.id);
     if (!seance) {
-      return res.status(404).send({ message: "Séance non trouvée" });
+      return res.status(404).send({ message: "seance non trouver" });
+    }
     }
 
-    // Vérifier si la salle est disponible à cette heure (sauf pour cette séance)
-    const conflit = await db.seance.findOne({
-      where: {
-        id: { [Op.ne]: req.params.id },
-        id_salle: req.body.id_salle,
-        date_heure: {
-          [Op.between]: [
-            new Date(new Date(req.body.date_heure).getTime() - 2 * 60 * 60 * 1000), // 2h avant
-            new Date(new Date(req.body.date_heure).getTime() + 2 * 60 * 60 * 1000)  // 2h après
-          ]
-        }
-      }
-    });
-
-    if (conflit) {
-      return res.status(400).send({ 
-        message: "La salle est déjà réservée pour une séance proche de cette heure" 
-      });
-    }
-
-    // Mettre à jour la séance
+    // update seance
     await seance.update({
       date_heure: req.body.date_heure,
       id_film: req.body.id_film,
@@ -493,14 +455,14 @@ exports.updateSeance = async (req, res) => {
 
     res.redirect("/moderator/seances");
   } catch (err) {
-    console.error("Erreur mise à jour séance:", err);
+    console.error("Erreur mise a jour seance:", err);
     res.status(500).send({ message: err.message });
   }
 };
-
+// nfas5 seance
 exports.deleteSeance = async (req, res) => {
   try {
-    // Vérifier s'il y a des réservations pour cette séance
+    // nthabtou ken fama des reservations fi seance ily 7atineha
     const reservations = await db.reservation.count({
       where: { id_seance: req.params.id }
     });
